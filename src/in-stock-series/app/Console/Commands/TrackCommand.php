@@ -28,8 +28,33 @@ class TrackCommand extends Command
      */
     public function handle()
     {
-        Product::all()->each->track();
+        $products = Product::all();
+        $this->output->progressStart($products->count());
 
-        $this->info('All done!');
+        $products->each(function($product) {
+            $product->track();
+            $this->output->progressAdvance();
+        });
+
+        $this->showResults();
+    }
+
+    protected function showResults()
+    {
+        $this->output->progressFinish();
+
+        $data = Product::query()
+            ->leftJoin('stock', 'stock.product_id', '=', 'products.id')
+            ->get($this->keys());
+
+        $this->table(
+            array_map('ucwords', $this->keys()),
+            $data
+        );
+    }
+
+    protected function keys()
+    {
+        return ['name', 'price', 'url', 'in_stock'];
     }
 }
