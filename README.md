@@ -1,0 +1,1 @@
+# laracasts-in-stock-series
